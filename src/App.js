@@ -54,6 +54,7 @@ const TokenCard = () => {
   const [isLoading, setIsloading] = useState(false);
   const [balance, setBalance] = useState("0");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
 
   const BOATLOAD_OF_GAS = Big(3)
     .times(10 ** 13)
