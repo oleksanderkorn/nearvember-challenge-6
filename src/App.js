@@ -80,6 +80,11 @@ const TokenCard = () => {
           const oldBalance = storedBalance();
           setStoredBalance(data);
           if (oldBalance && oldBalance !== data) {
+            if (oldBalance < data) {
+              setMessage(`Mint Succesfull, new balance ${data} $GRUMPY `);
+            } else {
+              setMessage(`Transfer Succesfull, new balance ${data} $GRUMPY `);
+            }
             setShowNotification(true);
             setTimeout(() => {
               setShowNotification(false);
@@ -287,7 +292,7 @@ const TokenCard = () => {
         </Grid>
       </Grid>
       {showNotification && (
-        <Notification oldBalance={storedBalance()} balance={balance} />
+        <Notification oldBalance={storedBalance()} message={message} />
       )}
     </Box>
   );
@@ -318,7 +323,7 @@ const MyAppBar = () => {
   );
 };
 
-const Notification = ({ balance }) => {
+const Notification = ({ message }) => {
   const urlPrefix = `https://explorer.${networkId}.near.org/accounts`;
   return (
     <aside>
@@ -327,7 +332,7 @@ const Notification = ({ balance }) => {
         rel="noreferrer"
         href={`${urlPrefix}/${window.accountId}`}
       ></a>
-      {`Mint Succesfull, new balance ${balance} $GRUMPY `}
+      {message}
       <a
         target="_blank"
         rel="noreferrer"
