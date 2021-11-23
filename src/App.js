@@ -52,12 +52,12 @@ export default function App() {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: 40,
+                marginTop: 50,
               }}
               container
               spacing={2}
             >
-              <Card sx={{ maxWidth: 700 }} style={{ marginTop: 40 }}>
+              <Card sx={{ maxWidth: 700 }}>
                 <CardContent>
                   <Typography variant="h5" component="div">
                     Sign in to send some GRUMPY tokens to your friend for free!
