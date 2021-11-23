@@ -229,7 +229,7 @@ const TokenCard = () => {
           <Card sx={{ maxWidth: 700 }}>
             <CardHeader
               title="Share GRUMPYness with your friend"
-              subheader={`Your balance is  ${balance}$GRUMPY`}
+              subheader={`Your balance is ${balance} $GRUMPY`}
             />
             <CardMedia
               component="img"
