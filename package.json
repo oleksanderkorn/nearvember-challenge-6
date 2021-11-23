@@ -1,8 +1,8 @@
 {
-  "name": "nearvember-challenge-5",
+  "name": "nearvember-challenge-6",
   "version": "0.1.0",
   "license": "UNLICENSED",
-  "homepage": "https://oleksanderkorn.github.io/nearvember-challenge-5/",
+  "homepage": "https://oleksanderkorn.github.io/nearvember-challenge-6/",
   "scripts": {
     "build": "npm run build:web",
     "build:web": "parcel build src/index.html --public-url ./",

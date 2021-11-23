@@ -9,28 +9,18 @@ import {
   AppBar,
   Toolbar,
   Button,
-  Alert,
-  Collapse,
-  IconButton,
-  Avatar,
   Card,
   CardMedia,
-  CardActions,
   CardHeader,
+  CardContent,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import IconRefresh from "@mui/icons-material/Refresh";
-import DeleteIcon from "@mui/icons-material/Delete";
-import UndoIcon from "@mui/icons-material/Undo";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./global.css";
-import randomWords from "random-words";
 import Big from "big.js";
-import axios from "axios";
-import CanvasDraw from "react-canvas-draw";
+import grumpyCat from "./grumpy_cat.jpeg";
 
 import getConfig from "./config";
 const { networkId } = getConfig("testnet");
@@ -43,168 +33,58 @@ export default function App() {
       <MyAppBar />
       {isLoggedIn() ? (
         <Box sx={{ flexGrow: 1 }}>
-          <Typography
-            style={{ marginTop: 65, textAlign: "center", marginRight: 20 }}
-            variant="h6"
-          >
-            Hi {window.accountId}! Draw your Own NFT!
-          </Typography>
-          <MintForm />
+          <TokenCard />
         </Box>
       ) : (
         <Typography
           style={{ marginTop: 65, textAlign: "center", marginRight: 20 }}
           variant="h6"
         >
-          Sign in to draw and mint your unique NFT!
+          Sign in to send some GRUMPY tokens to your friend for free!
         </Typography>
       )}
     </>
   );
 }
 
-const capitalize = (s) => {
-  if (typeof s !== "string") return "";
-  return s.charAt(0).toUpperCase() + s.slice(1);
-};
-
-const randomString = () => capitalize(randomWords(3).join(" "));
-
-const MintForm = () => {
+const TokenCard = () => {
   const [showNotification, setShowNotification] = useState(false);
+  const [receiver, setReceiver] = useState("lkskrnk.testnet");
+  const [amount, setAmount] = useState(1);
   const [isLoading, setIsloading] = useState(false);
+  const [balance, setBalance] = useState("0");
   const [error, setError] = useState("");
-  const [color, setColor] = useState("#000");
-  const [previousNft, setPreviousNft] = useState(undefined);
-
-  const [metadata, setMetadata] = useState({
-    title: randomString(),
-    description: "Your NFT description",
-    copies: 1,
-  });
-
-  const regenerateTitle = () =>
-    setMetadata((prev) => {
-      return {
-        ...prev,
-        title: randomString(),
-      };
-    });
-
-  const isFormValid = () => {
-    return (
-      metadata.title !== "" &&
-      metadata.description !== "" &&
-      metadata.copies > 0
-    );
-  };
-
-  const randomTokenId = () => {
-    const min = Math.ceil(1000);
-    const max = Math.floor(10000);
-    return `${Math.floor(Math.random() * (max - min) + min)}`;
-  };
 
   const BOATLOAD_OF_GAS = Big(3)
     .times(10 ** 13)
     .toFixed();
 
-  const nftStorageApiKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDViNDlGMUNDRmY2MGVkMWEwNDJmZEU5ODIzNDNhQTRiZWRBOUIzOTkiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzNzYxNjczMTcyNiwibmFtZSI6Im5lYXJ2ZXJtYmVyIn0.p-isz43Ls6ljKY2A9csp0dg1IKR7nWJZ687ruOmRXAk";
+  const storedBalance = () =>
+    localStorage.getItem(`balance_${window.accountId}`);
 
-  const mintNft = async () => {
-    const ref = drawRef.current;
-    const drawUrl = ref.getDataURL("image/jpeg", false, "#fff");
-    const blob = await (await fetch(drawUrl)).blob();
-    var reader = new FileReader();
-    reader.onloadend = async function () {
-      const response = await axios.post(
-        `https://api.nft.storage/upload`,
-        reader.result,
-        {
-          headers: { Authorization: `Bearer ${nftStorageApiKey}` },
-        }
-      );
-      const mediaUrl = `https://${response.data.value.cid}.ipfs.dweb.link/`;
-      contractCall(mediaUrl);
-    };
-    reader.readAsArrayBuffer(blob);
-  };
+  const resetStoredBalance = () =>
+    localStorage.removeItem(`balance_${window.accountId}`);
 
-  const drawRef = useRef(null);
+  const setStoredBalance = (newBalance) =>
+    localStorage.setItem(`balance_${window.accountId}`, newBalance);
 
-  const cleanCanvas = () => {
-    drawRef.current.clear();
-  };
-
-  const undo = () => {
-    drawRef.current.undo();
-  };
-
-  const removePreviousNft = () => {
-    localStorage.setItem("nft_token_id", null);
-    setPreviousNft(null);
-  };
-
-  useEffect(() => {
-    const existingtTokenId = localStorage.getItem("nft_token_id");
-    getNftByTokenId(existingtTokenId);
-  }, []);
-
-  const getNftByTokenId = (existingtTokenId) => {
-    if (existingtTokenId) {
-      window.contract
-        .nft_token({
-          token_id: existingtTokenId,
-        })
-        .then(
-          (data) => {
-            setPreviousNft(data);
-            setIsloading(false);
-          },
-          (err) => {
-            removePreviousNft();
-            setError(
-              err.kind && err.kind.ExecutionError
-                ? err.kind.ExecutionError
-                : `${err}`
-            );
-            setTimeout(() => {
-              setError("");
-            }, 5000);
-            setIsloading(false);
-          }
-        );
-    }
-  };
-
-  const contractCall = (mediaUrl) => {
-    const tokenId = randomTokenId();
-    localStorage.setItem("nft_token_id", tokenId);
+  const getAccountBalance = () => {
     window.contract
-      .nft_mint(
-        {
-          token_id: tokenId,
-          receiver_id: window.accountId,
-          metadata: {
-            title: metadata.title,
-            description: metadata.description,
-            copies: parseInt(metadata.copies),
-            media: mediaUrl,
-          },
-        },
-        BOATLOAD_OF_GAS,
-        Big(0.01)
-          .times(10 ** 24)
-          .toFixed()
-      )
+      .ft_balance_of({
+        account_id: window.accountId,
+      })
       .then(
-        (res) => {
+        (data) => {
+          setBalance(data);
           setIsloading(false);
-          setShowNotification(true);
-          setTimeout(() => {
-            setShowNotification(false);
-          }, 5000);
+          const oldBalance = storedBalance();
+          setStoredBalance(data);
+          if (oldBalance && oldBalance !== data) {
+            setShowNotification(true);
+            setTimeout(() => {
+              setShowNotification(false);
+            }, 6000);
+          }
         },
         (err) => {
           setError(
@@ -220,242 +100,196 @@ const MintForm = () => {
       );
   };
 
-  if (previousNft) {
-    return (
-      <Box autoComplete="off">
-        <Grid style={{ marginTop: 10 }} container spacing={2}>
-          <Grid
-            item
-            xs={12}
-            style={{ display: "flex", justifyContent: "center" }}
-          >
-            <Card sx={{ maxWidth: 600 }}>
-              <CardHeader
-                title={previousNft.metadata.title}
-                subheader={previousNft.metadata.description}
-              />
-              <CardMedia
-                component="img"
-                height="600"
-                image={previousNft.metadata.media}
-                alt={previousNft.metadata.title}
-              />
-              <CardActions disableSpacing>
-                <Button onClick={removePreviousNft}>Draw another one</Button>
-              </CardActions>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
+  useEffect(() => {
+    getAccountBalance();
+  }, []);
+
+  const registerToken = () => {
+    window.contract.storage_deposit(
+      {
+        account_id: window.accountId,
+      },
+      BOATLOAD_OF_GAS,
+      Big(1)
+        .times(10 ** 24)
+        .toFixed()
     );
-  }
+  };
+
+  const registerReceiver = () => {
+    window.contract.storage_deposit(
+      {
+        account_id: receiver,
+      },
+      BOATLOAD_OF_GAS,
+      Big(1)
+        .times(10 ** 24)
+        .toFixed()
+    );
+  };
+
+  const mintTokens = () => {
+    window.contract.ft_mint(
+      {
+        receiver_id: window.accountId,
+        amount: "1000",
+      },
+      BOATLOAD_OF_GAS,
+      Big(1)
+        .times(10 ** 24)
+        .toFixed()
+    );
+  };
+
+  const canTransfer = () => {
+    return receiver !== "" && amount > 0 && amount < 1000;
+  };
+
+  const transferTokens = () => {
+    if (canTransfer()) {
+      window.contract
+        .ft_transfer(
+          {
+            receiver_id: receiver,
+            amount: `${amount}`,
+          },
+          BOATLOAD_OF_GAS,
+          Big(0.000000000000000000000001)
+            .times(10 ** 24)
+            .toFixed()
+        )
+        .then(
+          (res) => {
+            setIsloading(false);
+            setShowNotification(true);
+            setTimeout(() => {
+              setShowNotification(false);
+            }, 5000);
+          },
+          (err) => {
+            setError(
+              err.kind && err.kind.ExecutionError
+                ? err.kind.ExecutionError
+                : `${err}`
+            );
+            setTimeout(() => {
+              setError("");
+            }, 5000);
+            setIsloading(false);
+          }
+        );
+    }
+  };
 
   return (
-    <>
-      <Box autoComplete="off">
-        <Grid style={{ marginTop: 10 }} container spacing={2}>
-          <Grid item xs={7}>
-            <TextField
-              fullWidth
-              id="title"
-              value={metadata.title}
-              onChange={(event) =>
-                setMetadata((prev) => {
-                  return {
-                    ...prev,
-                    title: event.target.value,
-                  };
-                })
-              }
-              label="Title"
-              variant="outlined"
+    <Box autoComplete="off">
+      <Grid style={{ marginTop: 40 }} container spacing={2}>
+        <Grid
+          item
+          xs={12}
+          style={{ display: "flex", justifyContent: "center" }}
+        >
+          <Card sx={{ maxWidth: 700 }}>
+            <CardHeader
+              title="Share GRUMPYness with your friend"
+              subheader={`Your balance is  ${balance}$GRUMPY`}
             />
-          </Grid>
-          <Grid
-            item
-            xs={1}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              flexDirection: "column",
-            }}
-          >
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={regenerateTitle}
-            >
-              <IconRefresh />
-            </IconButton>
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              fullWidth
-              id="copies"
-              label="Copies"
-              variant="outlined"
-              value={metadata.copies}
-              onChange={(event) =>
-                setMetadata((prev) => {
-                  return {
-                    ...prev,
-                    copies: event.target.value,
-                  };
-                })
-              }
-              type="number"
-              max="999"
-              min="1"
+            <CardMedia
+              component="img"
+              height="500"
+              width="500"
+              image={grumpyCat}
+              alt="Grumpy Cat"
             />
-          </Grid>
-          <Grid item xs={10}>
-            <TextField
-              fullWidth
-              id="description"
-              value={metadata.description}
-              onChange={(event) =>
-                setMetadata((prev) => {
-                  return {
-                    ...prev,
-                    description: event.target.value,
-                  };
-                })
-              }
-              label="Description"
-              variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <Button
-              fullWidth
-              style={{ height: "100%" }}
-              type="submit"
-              variant="outlined"
-              disabled={!isFormValid()}
-              onClick={mintNft}
-            >
-              Mint
-            </Button>
-          </Grid>
-          <Grid item xs={2}></Grid>
-          <Grid
-            item
-            xs={8}
-            style={{ display: "flex", justifyContent: "space-around" }}
-          >
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={cleanCanvas}
-            >
-              <DeleteIcon />
-            </IconButton>
-            <IconButton
-              aria-label="close"
-              color="inherit"
-              size="small"
-              onClick={undo}
-            >
-              <UndoIcon />
-            </IconButton>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("black")}
-              sx={{ bgcolor: "black" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("gray")}
-              sx={{ bgcolor: "gray" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("red")}
-              sx={{ bgcolor: "red" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("blue")}
-              sx={{ bgcolor: "blue" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("green")}
-              sx={{ bgcolor: "green" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("yellow")}
-              sx={{ bgcolor: "yellow" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("purple")}
-              sx={{ bgcolor: "purple" }}
-            >
-              {" "}
-            </Avatar>
-            <Avatar
-              style={{ cursor: "pointer" }}
-              onClick={() => setColor("lightgreen")}
-              sx={{ bgcolor: "lightgreen" }}
-            >
-              {" "}
-            </Avatar>
-          </Grid>
-          <Grid item xs={2}></Grid>
-          <Grid
-            item
-            xs={12}
-            style={{ display: "flex", justifyContent: "center" }}
-          >
-            <CanvasDraw
-              canvasWidth={600}
-              canvasHeight={600}
-              brushColor={color}
-              ref={drawRef}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Collapse in={error !== ""}>
-              <Alert
-                severity="error"
-                action={
-                  <IconButton
-                    aria-label="close"
-                    color="inherit"
-                    size="small"
-                    onClick={() => {
-                      setError("");
-                    }}
+            <CardContent>
+              <Grid style={{ marginTop: 10 }} container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="body2" color="text.secondary">
+                    Register yourself to use GRYMPY. Then Use Faucet to mint
+                    1000 $GRYMPY.
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    style={{ height: "100%" }}
+                    onClick={registerToken}
+                    variant="outlined"
                   >
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
-                }
-                sx={{ mb: 2 }}
-              >
-                {error}
-              </Alert>
-            </Collapse>
-          </Grid>
+                    Register
+                  </Button>
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    style={{ height: "100%" }}
+                    onClick={mintTokens}
+                    variant="outlined"
+                  >
+                    Mint 1000
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2" color="text.secondary">
+                    Enter receiver address. You may also need to register
+                    reciever. Use the dedicated button.
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    value={receiver}
+                    onChange={(event) => setReceiver(event.target.value)}
+                    label="Receiver"
+                    variant="standard"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    style={{ height: "100%" }}
+                    onClick={registerReceiver}
+                    variant="outlined"
+                    disabled={receiver === ""}
+                  >
+                    {`Register`}
+                  </Button>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2" color="text.secondary">
+                    Enter amount you want to send and click send!
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    type="number"
+                    label="Amount"
+                    variant="standard"
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <Button
+                    fullWidth
+                    style={{ height: "100%" }}
+                    onClick={transferTokens}
+                    variant="outlined"
+                    disabled={!canTransfer()}
+                  >
+                    Send
+                  </Button>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         </Grid>
-      </Box>
-      {showNotification && <Notification />}
-    </>
+      </Grid>
+      {showNotification && (
+        <Notification oldBalance={storedBalance()} balance={balance} />
+      )}
+    </Box>
   );
 };
 
@@ -466,7 +300,9 @@ const MyAppBar = () => {
     <AppBar>
       <Toolbar>
         <Typography component="div" sx={{ flexGrow: 1 }}>
-          NFT Minting
+          {isLoggedIn()
+            ? `Welcome to GRUMPY Cat Token Farm, ${window.accountId}`
+            : "Welcome to GRUMPY Cat Token Farm"}
         </Typography>
         {isLoggedIn() ? (
           <Button onClick={logout} color="inherit">
@@ -482,8 +318,7 @@ const MyAppBar = () => {
   );
 };
 
-// this component gets rendered by App after the form is submitted
-const Notification = () => {
+const Notification = ({ balance }) => {
   const urlPrefix = `https://explorer.${networkId}.near.org/accounts`;
   return (
     <aside>
@@ -491,10 +326,8 @@ const Notification = () => {
         target="_blank"
         rel="noreferrer"
         href={`${urlPrefix}/${window.accountId}`}
-      >
-        {window.accountId}
-      </a>
-      Mintint done.
+      ></a>
+      {`Mint Succesfull, new balance ${balance} $GRUMPY `}
       <a
         target="_blank"
         rel="noreferrer"
