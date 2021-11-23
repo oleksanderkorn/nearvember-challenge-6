@@ -23,6 +23,7 @@ import "@fontsource/roboto/700.css";
 import "./global.css";
 import Big from "big.js";
 import grumpyCat from "./grumpy_cat.jpeg";
+import grumpyHands from "./grumpy_hands.jpg";
 
 import getConfig from "./config";
 const { networkId } = getConfig("testnet");
@@ -46,12 +47,31 @@ export default function App() {
             <TokenCard />
           </Box>
         ) : (
-          <Typography
-            style={{ marginTop: 65, textAlign: "center", marginRight: 20 }}
-            variant="h6"
-          >
-            Sign in to send some GRUMPY tokens to your friend for free!
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <Grid
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: 40,
+              }}
+              container
+              spacing={2}
+            >
+              <Card sx={{ maxWidth: 700 }} style={{ marginTop: 40 }}>
+                <CardContent>
+                  <Typography variant="h5" component="div">
+                    Sign in to send some GRUMPY tokens to your friend for free!
+                  </Typography>
+                </CardContent>
+                <CardMedia
+                  component="img"
+                  width="600"
+                  image={grumpyHands}
+                  alt="Grumpy Cat"
+                />
+              </Card>
+            </Grid>
+          </Box>
         )}
       </ThemeProvider>
     </>
