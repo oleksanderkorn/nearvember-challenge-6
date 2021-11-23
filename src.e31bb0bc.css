@@ -443,7 +443,7 @@ aside footer *:last-child {
   }
 }
 
-/* @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
   html {
     --bg: #1e1e1e;
     --fg: #efefef;
@@ -452,12 +452,12 @@ aside footer *:last-child {
     --light-gray: #444;
   }
   h1 {
-    background-image: url(assets/logo-white.svg);
+    background-image: url(/logo-white.7fec831f.svg);
   }
   input:focus {
     box-shadow: 0 0 10em rgba(255, 255, 255, 0.02) inset;
   }
-} */
+}
 
 
 /*# sourceMappingURL=/src.e31bb0bc.css.map */
