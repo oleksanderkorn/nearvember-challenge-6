@@ -83,9 +83,12 @@ const TokenCard = () => {
   const [receiver, setReceiver] = useState("lkskrnk.testnet");
   const [amount, setAmount] = useState(1);
   const [isLoading, setIsloading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [receiverRegistered, setReceiverRegistered] = useState(false);
   const [balance, setBalance] = useState("0");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [totalSupply, setTotalSupply] = useState(null);
 
   const BOATLOAD_OF_GAS = Big(3)
     .times(10 ** 13)
@@ -99,6 +102,12 @@ const TokenCard = () => {
 
   const setStoredBalance = (newBalance) =>
     localStorage.setItem(`balance_${window.accountId}`, newBalance);
+
+  const isRegistered = (account) => {
+    return window.contract.is_registered({
+      account_id: account,
+    });
+  };
 
   const getAccountBalance = () => {
     window.contract
@@ -139,6 +148,12 @@ const TokenCard = () => {
 
   useEffect(() => {
     getAccountBalance();
+  }, []);
+
+  useEffect(() => {
+    window.contract.ft_total_supply({}).then((data) => {
+      setTotalSupply(data);
+    });
   }, []);
 
   const registerToken = () => {
@@ -243,7 +258,8 @@ const TokenCard = () => {
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
                     Register yourself to use GRYMPY. Then Use Faucet to mint
-                    1000 $GRYMPY.
+                    1000 $GRYMPY.{" "}
+                    {totalSupply && `Total Issuance: ${totalSupply} $GRYMPY`}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -251,9 +267,10 @@ const TokenCard = () => {
                     fullWidth
                     style={{ height: "100%" }}
                     onClick={registerToken}
+                    disabled={registered}
                     variant="outlined"
                   >
-                    Register
+                    {registered ? "Account Registered" : "Register"}
                   </Button>
                 </Grid>
                 <Grid item xs={6}>
@@ -275,7 +292,12 @@ const TokenCard = () => {
                 <Grid item xs={6}>
                   <TextField
                     value={receiver}
-                    onChange={(event) => setReceiver(event.target.value)}
+                    onChange={async (event) => {
+                      const res = event.target.value;
+                      setReceiver(res);
+                      // const isReg = await isRegistered(res);
+                      // setReceiverRegistered(isReg);
+                    }}
                     label="Receiver"
                     variant="standard"
                     fullWidth
@@ -286,8 +308,8 @@ const TokenCard = () => {
                     fullWidth
                     style={{ height: "100%" }}
                     onClick={registerReceiver}
-                    variant="outlined"
                     disabled={receiver === ""}
+                    variant="outlined"
                   >
                     {`Register`}
                   </Button>
