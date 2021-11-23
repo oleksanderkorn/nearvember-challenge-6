@@ -187,7 +187,7 @@ aside footer *:last-child {
   }
 }
 
-/* @media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
   html {
     --bg: #1e1e1e;
     --fg: #efefef;
@@ -201,4 +201,4 @@ aside footer *:last-child {
   input:focus {
     box-shadow: 0 0 10em rgba(255, 255, 255, 0.02) inset;
   }
-} */
+}

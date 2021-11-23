@@ -13,7 +13,9 @@ import {
   CardMedia,
   CardHeader,
   CardContent,
+  CssBaseline,
 } from "@mui/material";
+import { ThemeProvider, useTheme, createTheme } from "@mui/material/styles";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -25,24 +27,33 @@ import grumpyCat from "./grumpy_cat.jpeg";
 import getConfig from "./config";
 const { networkId } = getConfig("testnet");
 
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
+
 export default function App() {
   const isLoggedIn = () => window.walletConnection.isSignedIn();
 
   return (
     <>
-      <MyAppBar />
-      {isLoggedIn() ? (
-        <Box sx={{ flexGrow: 1 }}>
-          <TokenCard />
-        </Box>
-      ) : (
-        <Typography
-          style={{ marginTop: 65, textAlign: "center", marginRight: 20 }}
-          variant="h6"
-        >
-          Sign in to send some GRUMPY tokens to your friend for free!
-        </Typography>
-      )}
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <MyAppBar />
+        {isLoggedIn() ? (
+          <Box sx={{ flexGrow: 1 }}>
+            <TokenCard />
+          </Box>
+        ) : (
+          <Typography
+            style={{ marginTop: 65, textAlign: "center", marginRight: 20 }}
+            variant="h6"
+          >
+            Sign in to send some GRUMPY tokens to your friend for free!
+          </Typography>
+        )}
+      </ThemeProvider>
     </>
   );
 }
@@ -301,7 +312,16 @@ const TokenCard = () => {
 
 const MyAppBar = () => {
   const isLoggedIn = () => window.walletConnection.isSignedIn();
-
+  const [mode, setMode] = useState("light");
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode,
+        },
+      }),
+    [mode]
+  );
   return (
     <AppBar>
       <Toolbar>
