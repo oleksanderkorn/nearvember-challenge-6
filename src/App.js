@@ -8,6 +8,7 @@ import {
   Grid,
   AppBar,
   Toolbar,
+  IconButton,
   Button,
   Card,
   CardMedia,
@@ -15,6 +16,7 @@ import {
   CardContent,
   CssBaseline,
 } from "@mui/material";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 import { ThemeProvider, useTheme, createTheme } from "@mui/material/styles";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -22,8 +24,8 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "./global.css";
 import Big from "big.js";
-import grumpyCat from "./grumpy_cat.jpeg";
-import grumpyHands from "./grumpy_hands.jpg";
+import screamingMan from "./assets/screaming.png";
+import screamingMan2 from "./assets/screaming2.png";
 
 import getConfig from "./config";
 const { networkId } = getConfig("testnet");
@@ -57,17 +59,26 @@ export default function App() {
               container
               spacing={2}
             >
-              <Card sx={{ maxWidth: 700 }}>
-                <CardContent>
-                  <Typography variant="h5" component="div">
-                    Sign in to send some GRUMPY tokens to your friend for free!
-                  </Typography>
-                </CardContent>
+              <Card sx={{ maxWidth: 1200 }}>
+                <CardHeader
+                  style={{ textAlign: "center" }}
+                  title={`Scream together with yout friend using AAAAA token`}
+                  subheader={`Sign in to start!`}
+                  action={
+                    <IconButton
+                      component="a"
+                      href="https://youtu.be/gfkts0u-m6w?t=25"
+                      target="_blank"
+                      aria-label="settings"
+                    >
+                      <YouTubeIcon />
+                    </IconButton>
+                  }
+                />
                 <CardMedia
                   component="img"
-                  width="600"
-                  image={grumpyHands}
-                  alt="Grumpy Cat"
+                  image={screamingMan2}
+                  alt="Screaming"
                 />
               </Card>
             </Grid>
@@ -122,9 +133,9 @@ const TokenCard = () => {
           setStoredBalance(data);
           if (oldBalance && oldBalance !== data) {
             if (oldBalance < data) {
-              setMessage(`Mint Succesfull, new balance ${data} $GRUMPY `);
+              setMessage(`Mint Succesfull, new balance ${data} $AAAAA `);
             } else {
-              setMessage(`Transfer Succesfull, new balance ${data} $GRUMPY `);
+              setMessage(`Transfer Succesfull, new balance ${data} $AAAAA `);
             }
             setShowNotification(true);
             setTimeout(() => {
@@ -162,7 +173,7 @@ const TokenCard = () => {
         account_id: window.accountId,
       },
       BOATLOAD_OF_GAS,
-      Big(1)
+      Big(0.01)
         .times(10 ** 24)
         .toFixed()
     );
@@ -174,7 +185,7 @@ const TokenCard = () => {
         account_id: receiver,
       },
       BOATLOAD_OF_GAS,
-      Big(1)
+      Big(0.01)
         .times(10 ** 24)
         .toFixed()
     );
@@ -187,7 +198,7 @@ const TokenCard = () => {
         amount: "1000",
       },
       BOATLOAD_OF_GAS,
-      Big(1)
+      Big(0.01)
         .times(10 ** 24)
         .toFixed()
     );
@@ -241,25 +252,32 @@ const TokenCard = () => {
           xs={12}
           style={{ display: "flex", justifyContent: "center" }}
         >
-          <Card sx={{ maxWidth: 700 }}>
+          <Card sx={{ maxWidth: 800 }}>
             <CardHeader
-              title="Share GRUMPYness with your friend"
-              subheader={`Your balance is ${balance} $GRUMPY`}
+              title={`Hi, ${window.accountId}!`}
+              subheader={`Send $AAAAA to you friend to scream together! Your balance is ${balance} $AAAAA`}
+              action={
+                <IconButton
+                  component="a"
+                  href="https://youtu.be/gfkts0u-m6w?t=25"
+                  target="_blank"
+                  aria-label="settings"
+                >
+                  <YouTubeIcon />
+                </IconButton>
+              }
             />
             <CardMedia
               component="img"
-              height="500"
-              width="500"
-              image={grumpyCat}
-              alt="Grumpy Cat"
+              image={screamingMan}
+              alt="Screaming Man"
             />
             <CardContent>
               <Grid style={{ marginTop: 10 }} container spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">
-                    Register yourself to use GRYMPY. Then Use Faucet to mint
-                    1000 $GRYMPY.{" "}
-                    {totalSupply && `Total Issuance: ${totalSupply} $GRYMPY`}
+                    Register your account first and then Mint 1000 $AAAAA.{" "}
+                    {totalSupply && `Total Issuance: ${totalSupply} $AAAAA`}
                   </Typography>
                 </Grid>
                 <Grid item xs={6}>
@@ -365,24 +383,17 @@ const MyAppBar = () => {
     [mode]
   );
   return (
-    <AppBar>
-      <Toolbar>
-        <Typography component="div" sx={{ flexGrow: 1 }}>
-          {isLoggedIn()
-            ? `Welcome to GRUMPY Cat Token Farm, ${window.accountId}`
-            : "Welcome to GRUMPY Cat Token Farm"}
-        </Typography>
-        {isLoggedIn() ? (
-          <Button onClick={logout} color="inherit">
-            Log out
-          </Button>
-        ) : (
-          <Button color="inherit" onClick={login}>
-            Login
-          </Button>
-        )}
-      </Toolbar>
-    </AppBar>
+    <>
+      {isLoggedIn() ? (
+        <Button style={{ float: "right" }} onClick={logout} color="inherit">
+          Log out
+        </Button>
+      ) : (
+        <Button style={{ float: "right" }} color="inherit" onClick={login}>
+          Login
+        </Button>
+      )}
+    </>
   );
 };
 
