@@ -62,7 +62,7 @@ export default function App() {
               <Card sx={{ maxWidth: 1200 }}>
                 <CardHeader
                   style={{ textAlign: "center" }}
-                  title={`Scream together with yout friend using AAAAA token`}
+                  title={`Scream together with your friend using AAAAA token`}
                   subheader={`Sign in to start!`}
                   action={
                     <IconButton
